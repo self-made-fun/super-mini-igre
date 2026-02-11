@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎮 Super Mini Igre za Djecu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Exit Zone - Top Right Corner */
+        .exit-zone {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            z-index: 9999;
+            background: rgba(255,255,255,0.1);
+            border-bottom-left-radius: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .exit-zone:active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .exit-counter {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            z-index: 10000;
+            display: none;
+        }
+
+        h1 {
+            font-size: 2em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin: 20px 0 10px;
+            animation: bounce 2s infinite;
+            text-align: center;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 800px;
+            width: 100%;
+            margin-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .game-btn {
+            background: white;
+            border: none;
+            border-radius: 20px;
+            padding: 20px 15px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            min-height: 120px;
+            justify-content: center;
+        }
+
+        .game-btn:hover, .game-btn:active {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .game-btn span {
+            font-size: 2.5em;
+        }
+
+        #game-color { color: #e74c3c; }
+        #game-number { color: #3498db; }
+        #game-letter { color: #2ecc71; }
+        #game-animal { color: #f39c12; }
+        #game-shape { color: #9b59b6; }
+        #game-math { color: #e67e22; }
+        #game-memory { color: #1abc9c; }
+        #game-sound { color: #34495e; }
+        #game-size { color: #e91e63; }
+        #game-pattern { color: #00bcd4; }
+
+        .game-container {
+            display: none;
+            background: white;
+            border-radius: 30px;
+            padding: 20px;
+            max-width: 900px;
+            width: 100%;
+            color: #333;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.5s ease;
+            margin-top: 10px;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .timer {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #e74c3c;
+            background: #fee;
+            padding: 8px 15px;
+            border-radius: 15px;
+        }
+
+        .score {
+            font-size: 1.3em;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #7f8c8d;
+        }
+
+        .start-screen, .game-over {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .start-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .final-score {
+            font-size: 2.5em;
+            color: #f39c12;
+            margin: 15px 0;
+        }
+
+        .stars {
+            font-size: 2.5em;
+            margin: 15px 0;
+        }
+
+        /* Game Specific Styles */
+        .color-target, .animal-target, .shape-target, .size-target, .pattern-target {
+            font-size: 1.5em;
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+
+        .option-btn {
+            aspect-ratio: 1;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            background: #f8f9fa;
+        }
+
+        .option-btn:hover, .option-btn:active {
+            transform: scale(1.05);
+            border-color: #667eea;
+        }
+
+        .option-btn.wrong {
+            animation: shake 0.5s;
+            background: #fee;
+            border-color: #e74c3c;
+        }
+
+        .option-btn.correct {
+            animation: pulse 0.5s;
+            background: #d4edda;
+            border-color: #2ecc71;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .number-display, .math-display {
+            font-size: 3em;
+            text-align: center;
+            color: #3498db;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .letter-hint {
+            font-size: 1.3em;
+            text-align: center;
+            margin: 15px 0;
+            color: #666;
+        }
+
+        .letter-display {
+            font-size: 4em;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: bold;
+            color: #2ecc71;
+            text-transform: uppercase;
+        }
+
+        .letter-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .letter-btn {
+            width: 70px;
+            height: 70px;
+            font-size: 1.8em;
+            border: 4px solid #2ecc71;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .letter-btn:hover {
+            background: #2ecc71;
+            color: white;
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .memory-card {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            transition: transform 0.3s;
+            transform-style: preserve-3d;
+        }
+
+        .memory-card.flipped {
+            background: white;
+            border: 3px solid #667eea;
+        }
+
+        .sound-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border: none;
+            font-size: 3em;
+            cursor: pointer;
+            margin: 20px auto;
+            display: block;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .sound-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .sound-btn:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5em; }
+            .menu { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .game-btn { padding: 15px 10px; min-height: 100px; font-size: 0.9em; }
+            .game-btn span { font-size: 2em; }
+            .option-btn { font-size: 2em; }
+            .letter-btn { width: 60px; height: 60px; font-size: 1.5em; }
+        }
+
+        .fullscreen-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            z-index: 1000;
+            animation: fadeOut 3s forwards;
+            animation-delay: 3s;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Exit Zone -->
+    <div class="exit-zone" id="exitZone" onclick="handleExitTap()">❌</div>
+    <div class="exit-counter" id="exitCounter">Još: <span id="tapsRemaining">20</span></div>
+
+    <div class="fullscreen-hint" id="fullscreenHint">Dodirni ekran za puni zaslon! 📱</div>
+
+    <h1>🎮 Super Mini Igre</h1>
+    
+    <!-- Glavni Meni -->
+    <div id="mainMenu" class="menu">
+        <button class="game-btn" onclick="startGame('color')">
+            <span>🎨</span>
+            <div id="game-color">Spoji Boju</div>
+        </button>
+        <button class="game-btn" onclick="startGame('number')">
+            <span>🔢</span>
+            <div id="game-number">Dodirni Broj</div>
+        </button>
+        <button class="game-btn" onclick="startGame('letter')">
+            <span>🔤</span>
+            <div id="game-letter">Pogodi Slovo</div>
+        </button>
+        <button class="game-btn" onclick="startGame('animal')">
+            <span>🐶</span>
+            <div id="game-animal">Pronađi Životinju</div>
+        </button>
+        <button class="game-btn" onclick="startGame('shape')">
+            <span>🔷</span>
+            <div id="game-shape">Pronađi Oblik</div>
+        </button>
+        <button class="game-btn" onclick="startGame('math')">
+            <span>➕</span>
+            <div id="game-math">Jednostavni Zbroj</div>
+        </button>
+        <button class="game-btn" onclick="startGame('memory')">
+            <span>🧠</span>
+            <div id="game-memory">Memorija</div>
+        </button>
+        <button class="game-btn" onclick="startGame('sound')">
+            <span>🔊</span>
+            <div id="game-sound">Pogodi Zvuk</div>
+        </button>
+        <button class="game-btn" onclick="startGame('size')">
+            <span>📏</span>
+            <div id="game-size">Veliko ili Malo</div>
+        </button>
+        <button class="game-btn" onclick="startGame('pattern')">
+            <span>🎵</span>
+            <div id="game-pattern">Nastavi Niz</div>
+        </button>
+    </div>
+
+    <!-- IGRA 1: Spoji Boju -->
+    <div id="colorGame" class="game-container">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToMenu()">⬅ Natrag</button>
+            <div class="timer" id="colorTimer">60</div>
+            <div class="score">Bodovi: <span id="colorScore">0</span></div>
+        </div>
+        <div class="start-screen" id="colorStart">
+            <h2>🎨 Spoji Boju</h2>
+            <p style="font-size: 1.1em; margin: 15px 0;">Pronađi točnu boju!</p>
+            <button class="start-btn" onclick="initColorGame()">Započni!</button>
+        </div>
+        <div id="colorPlay" style="display:none;">
+            <div class="color-target" id="colorTarget">Pronađi: <span id="targetColorName">CRVENU</span></div>
+            <div class="grid-3" id="colorGrid"></div>
+        </div>
+        <div class="game-over" id="colorOver">
+            <h2>🎉 Kraj Igre!</h2>
+            <div class="final-score" id="colorFinalScore">0</div>
+            <div class="stars" id="colorStars"></div>
+            <button class="start-btn" onclick="initColorGame()">Igraj Ponovno</button>
+        </div>
+    </div>
+
+    <!-- IGRA 2: Dodirni Broj -->
+    <div id="numberGame" class="game-container">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToMenu()">⬅ Natrag</button>
+            <div class="timer" id="numberTimer">60</div>
+            <div class="score">Bodovi: <span id="numberScore">0</span></div>
+        </div>
+        <div class="start-screen" id="numberStart">
+            <h2>🔢 Dodirni Broj</h2>
+            <p style="font-size: 1.1em; margin: 15px 0;">Pronađi broj koji vidiš!</p>
+            <button class="start-btn" onclick="initNumberGame()">Započni!</button>
+        </div>
+        <div id="numberPlay" style="display:none;">
+            <div class="number-display" id="targetNumber">5</div>
+            <div class="grid-4" id="numberGrid"></div>
+        </div>
+        <div class="game-over" id="numberOver">
+            <h2>🎉 Kraj Igre!</h2>
+            <div class="final-score" id="numberFinalScore">0</div>
+            <div class="stars" id="numberStars"></div>
+            <button class="start-btn" onclick="initNumberGame()">Igraj Ponovno</button>
+        </div>
+    </div>
+
+    <!-- IGRA 3: Pogodi Slovo -->
+    <div id="letterGame" class="game-container">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToMenu()">⬅ Natrag</button>
+            <div class="timer" id="letterTimer">60</div>
+            <div class="score">Bodovi: <span id="letterScore">0</span></div>
+        </div>
+        <div class="start-screen" id="letterStart">
+            <h2>🔤 Pogodi Slovo</h2>
+            <p style="font-size: 1.1em; margin: 15px 0;">Koje slovo nedostaje?</p>
+            <button class="start-btn" onclick="initLetterGame()">Započni!</button>
+        </div>
+        <div id="letterPlay" style="display:none;">
+            <div class="letter-hint" id="letterHint">RIJEČ: MA_KA</div>
+            <div class="letter-display" id="letterDisplay">_</div>
+            <div class="letter-options" id="letterOptions"></div>
+        </div>
+        <div class="game-over" id="letterOver">
+            <h2>🎉 Kraj Igre!</h2>
+            <div class="final-score" id="letterFinalScore">0</div>
+            <div class="stars" id="letterStars"></div>
+            <button class="start-btn" onclick="initLetterGame()">Igraj Ponovno</button>
+        </div>
+    </div>
+
+    <!-- IGRA 4: Pronađi Životinju -->
+    <div id="animalGame" class="game-container">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToMenu()">⬅ Natrag</button>
+            <div class="timer" id="animalTimer">60</div>
+            <div class="score">Bodovi: <span id="animalScore">0</span></div>
+        </div>
+        <div class="start-screen" id="animalStart">
+            <h2>🐶 Pronađi Životinju</h2>
+            <p style="font-size: 1.1em; margin: 15px 0;">Gdje se skriva?</p>
+            <button class="start-btn" onclick="initAnimalGame()">Započni!</button>
+        </div>
+        <div id="animalPlay" style="display:none;">
+            <div class="animal-target">Pronađi: <span id="targetAnimal" style="font-size: 2em;">🐶</span></div>
+            <div class="grid-3" id="animalGrid"></div>
+        </div>
+        <div class="game-over" id="animalOver">
+            <h2>🎉 Kraj Igre!</h2>
+            <div class="final-score" id="animalFinalScore">0</div>
+            <div class="stars" id="animalStars"></div>
+            <button class="start-btn" onclick="initAnimalGame()">Igraj Ponovno</button>
+        </div>
+    </div>
+
+    <!-- IGRA 5: Pronađi Oblik -->
+    <div id="shapeGame" class="game-container">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToMenu()">⬅ Natrag</button>
+            <div class="timer" id="shapeTimer">60</div>
+            <div class="score">Bodovi: <span id="shapeScore">0</span></div>
+        </div>
+        <div class="start-screen" id="shapeStart">
+            <h2>🔷 Pronađi Oblik</h2>
+            <p style="font-size: 1.1em; margin: 15px 0;">Pronađi isti oblik!</p>
+            <button class="start-btn" onclick="initShapeGame()">Započni!</button>
+        </div>
+        <div id="shapePlay" style="display:none;">
+            <div class="shape-target" id="shapeTarget">Pronađi: <span id="targetShape" style="font-size: 3em;">🔷</span></div>
+            <div class="grid-3" id="shapeGrid"></div>
+        </div>
+        <div class="game-over" id="shapeOver">
+            <h2>🎉 Kraj Igre!</h2>
+            <div class="final-score" id="shapeFinalScore">0</div>
+            <div class="stars" id="shapeStars"></div>
+            <button class="start-btn" onclick="initShapeGame()">Igraj Ponovno</button>
+        </div>
+    </div>
+
+    <!-- IGRA 6: Jednostavni Zbroj -->
+    <div id="mathGame" class="game-container">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToMenu()">⬅ Natrag</button>
+            <div class="timer" id="mathTimer">60</div>
+            <div class="score">Bodovi: <span id="mathScore">0</span></div>
+        </div>
+        <div class="start-screen" id="mathStart">
+            <h2>➕ Jednostavni Zbroj</h2>
+            <p style="font-size: 1.1em; margin: 15px 0;">Koliko je?</p>
+            <button class="start-btn" onclick="initMathGame()">Započni!</button>
+        </div>
+        <div id="mathPlay" style="display:none;">
+            <div class="math-display" id="mathProblem">2 + 3 = ?</div>
+            <div class="grid-3" id="mathGrid"></div>
+        </div>
+        <div class="game-over" id="mathOver">
+            <h2>🎉 Kraj Igre!</h2>
+            <div class="final-score" id="mathFinalScore">0</div>
+            <div class="stars" id="mathStars"></div>
+            <button class="start-btn" onclick="initMathGame()">Igraj Ponovno</button>
+        </div>
+    </div>
+
+    <!-- IGRA 7: Memorija -->
+    <div id="memoryGame" class="game-container">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToMenu()">⬅ Natrag</button>
+            <div class="timer" id="memoryTimer">60</div>
+            <div class="score">Pokušaji: <span id="memoryScore">0</span></div>
+        </div>
+        <div class="start-screen" id="memoryStart">
+            <h2>🧠 Memorija</h2>
+            <p style="font-size: 1.1em; margin: 15px 0;">Pronađi parove!</p>
+            <button class="start-btn" onclick="initMemoryGame()">Započni!</button>
+        </div>
+        <div id="memoryPlay" style="display:none;">
+            <div class="memory-grid" id="memoryGrid"></div>
+        </div>
+        <div class="game-over" id="memoryOver">
+            <h2>🎉 Kraj Igre!</h2>
+            <div class="final-score" id="memoryFinalScore">0</div>
+            <div class="stars" id="memoryStars"></div>
+            <button class="start-btn" onclick="initMemoryGame()">Igraj Ponovno</button>
+        </div>
+    </div>
+
+    <!-- IGRA 8: Pogodi Zvuk -->
+    <div id="soundGame" class="game-container">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToMenu()">⬅ Natrag</button>
+            <div class="timer" id="soundTimer">60</div>
+            <div class="score">Bodovi: <span id="soundScore">0</span></div>
+        </div>
+        <div class="start-screen" id="soundStart">
+            <h2>🔊 Pogodi Zvuk</h2>
+            <p style="font-size: 1.1em; margin: 15px 0;">Čuješ li zvuk?</p>
+            <button class="start-btn" onclick="initSoundGame()">Započni!</button>
+        </div>
+        <div id="soundPlay" style="display:none;">
+            <button class="sound-btn" id="playSoundBtn" onclick="playCurrentSound()">🔊</button>
+            <p style="text-align: center; margin: 10px 0;">Koji je ovo zvuk?</p>
+            <div class="grid-2" id="soundGrid"></div>
+        </div>
+        <div class="game-over" id="soundOver">
+            <h2>🎉 Kraj Igre!</h2>
+            <div class="final-score" id="soundFinalScore">0</div>
+            <div class="stars" id="soundStars"></div>
+            <button class="start-btn" onclick="initSoundGame()">Igraj Ponovno</button>
+        </div>
+    </div>
+
+    <!-- IGRA 9: Veliko ili Malo -->
+    <div id="sizeGame" class="game-container">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToMenu()">⬅ Natrag</button>
+            <div class="timer" id="sizeTimer">60</div>
+            <div class="score">Bodovi: <span id="sizeScore">0</span></div>
+        </div>
+        <div class="start-screen" id="sizeStart">
+            <h2>📏 Veliko ili Malo</h2>
+            <p style="font-size: 1.1em; margin: 15px 0;">Pronađi veće/manje!</p>
+            <button class="start-btn" onclick="initSizeGame()">Započni!</button>
+        </div>
+        <div id="sizePlay" style="display:none;">
+            <div class="size-target" id="sizeTarget">Pronađi VEĆE</div>
+            <div class="grid-2" id="sizeGrid"></div>
+        </div>
+        <div class="game-over" id="sizeOver">
+            <h2>🎉 Kraj Igre!</h2>
+            <div class="final-score" id="sizeFinalScore">0</div>
+            <div class="stars" id="sizeStars"></div>
+            <button class="start-btn" onclick="initSizeGame()">Igraj Ponovno</button>
+        </div>
+    </div>
+
+    <!-- IGRA 10: Nastavi Niz -->
+    <div id="patternGame" class="game-container">
+        <div class="game-header">
+            <button class="back-btn" onclick="backToMenu()">⬅ Natrag</button>
+            <div class="timer" id="patternTimer">60</div>
+            <div class="score">Bodovi: <span id="patternScore">0</span></div>
+        </div>
+        <div class="start-screen" id="patternStart">
+            <h2>🎵 Nastavi Niz</h2>
+            <p style="font-size: 1.1em; margin: 15px 0;">Što dolazi sljedeće?</p>
+            <button class="start-btn" onclick="initPatternGame()">Započni!</button>
+        </div>
+        <div id="patternPlay" style="display:none;">
+            <div class="pattern-target" id="patternDisplay" style="font-size: 2.5em; letter-spacing: 10px;">🔴🔵🔴🔵?</div>
+            <div class="grid-3" id="patternGrid"></div>
+        </div>
+        <div class="game-over" id="patternOver">
+            <h2>🎉 Kraj Igre!</h2>
+            <div class="final-score" id="patternFinalScore">0</div>
+            <div class="stars" id="patternStars"></div>
+            <button class="start-btn" onclick="initPatternGame()">Igraj Ponovno</button>
+        </div>
+    </div>
+
+    <script>
+        // Exit handling
+        let exitTaps = 0;
+        const requiredTaps = 20;
+        let exitTimer = null;
+
+        function handleExitTap() {
+            exitTaps++;
+            const remaining = requiredTaps - exitTaps;
+            
+            document.getElementById('exitCounter').style.display = 'block';
+            document.getElementById('tapsRemaining').textContent = remaining;
+            
+            if (exitTimer) clearTimeout(exitTimer);
+            exitTimer = setTimeout(() => {
+                exitTaps = 0;
+                document.getElementById('exitCounter').style.display = 'none';
+            }, 3000);
+            
+            if (exitTaps >= requiredTaps) {
+                if (confirm('Želiš li izaći iz igre?')) {
+                    window.close();
+                    document.body.innerHTML = '<h1 style="text-align:center; margin-top:50px;">Doviđenja! 👋</h1>';
+                }
+                exitTaps = 0;
+                document.getElementById('exitCounter').style.display = 'none';
+            }
+        }
+
+        // Fullscreen handling
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+            document.getElementById('fullscreenHint').style.display = 'none';
+        }
+
+        document.addEventListener('click', function() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                enterFullscreen();
+            }
+        }, { once: true });
+
+        // Game variables
+        let currentGame = null;
+        let timer = null;
+        let timeLeft = 60;
+        let score = 0;
+
+        // Data
+        const colors = [
+            { name: 'CRVENU', bg: '#e74c3c' }, { name: 'PLAVU', bg: '#3498db' },
+            { name: 'ZELENU', bg: '#2ecc71' }, { name: 'ŽUTU', bg: '#f1c40f' },
+            { name: 'LJUBIČASTU', bg: '#9b59b6' }, { name: 'NARANČASTU', bg: '#e67e22' },
+            { name: 'RUŽIČASTU', bg: '#fd79a8' }, { name: 'SMEĐU', bg: '#8b4513' },
+            { name: 'CRNU', bg: '#2c3e50' }, { name: 'BIJELU', bg: '#ecf0f1' },
+            { name: 'SIVU', bg: '#7f8c8d' }, { name: 'TIRKIZNU', bg: '#1abc9c' }
+        ];
+
+        const animals = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐈‍⬛','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿','🦔'];
+
+        const shapes = ['🔴','🔵','🟢','🟡','🟠','🟣','🟤','⚫','⚪','🔺','🔻','🔸','🔹','🔶','🔷','🔲','🔳','▪️','▫️','◾','◽','◼️','◻️','⬛','⬜','⭐','🌟','💫','✨','⚡','❄️','🔥','💧','🍀','🍁','🍄','🌰','🌵','🌲','🌳','🌴','🌻','🌼','🌸','🌺','🌷','🌹','💐','🌾','🌿','☘️','🍃','🍂','🍁','🍄','🌵','🎄','🎋','🎍'];
+
+        const words = [
+            { full: 'MAČKA', display: 'MA_KA', missing: 'Č', options: ['Č','Ć','C','K'] },
+            { full: 'PAS', display: '_AS', missing: 'P', options: ['P','B','D','T'] },
+            { full: 'KUĆA', display: 'KU_A', missing: 'Ć', options: ['Ć','Č','C','K'] },
+            { full: 'MAMA', display: 'M_MA', missing: 'A', options: ['A','E','I','O'] },
+            { full: 'TATA', display: 'T_TA', missing: 'A', options: ['A','O','E','I'] },
+            { full: 'BABA', display: '_ABA', missing: 'B', options: ['B','P','D','V'] },
+            { full: 'SOBA', display: 'SO_A', missing: 'B', options: ['B','P','V','D'] },
+            { full: 'VRATA', display: 'VR_TA', missing: 'A', options: ['A','E','I','O'] },
+            { full: 'STOL', display: 'STO_', missing: 'L', options: ['L','J','R','V'] },
+            { full: 'STOLICA', display: 'STO_ICA', missing: 'L', options: ['L','J','R','V'] },
+            { full: 'IGRAČKA', display: 'IGRA_KA', missing: 'Č', options: ['Č','Ć','C','K'] },
+            { full: 'LOPTA', display: 'LOPT_', missing: 'A', options: ['A','E','O','U'] },
+            { full: 'KREVET', display: '_REVET', missing: 'K', options: ['K','G','H','J'] },
+            { full: 'PROZOR', display: 'PRO_OR', missing: 'Z', options: ['Z','S','Ž','Š'] },
+            { full: 'CVIJET', display: 'CVI_ET', missing: 'J', options: ['J','L','LJ','NJ'] },
+            { full: 'SUNCE', display: 'SUN_E', missing: 'C', options: ['C','K','S','Z'] },
+            { full: 'MJESEC', display: 'MJE_E', missing: 'S', options: ['S','Z','C','K'] },
+            { full: 'ZVIJEZDA', display: 'ZVIJE_DA', missing: 'Z', options: ['Z','S','Ž','Š'] },
+            { full: 'KIŠA', display: '_IŠA', missing: 'K', options: ['K','G','H','J'] },
+            { full: 'SNIJEG', display: 'SNI_EG', missing: 'J', options: ['J','L','LJ','NJ'] },
+            { full: 'MORE', display: 'M_RE', missing: 'O', options: ['O','A','E','U'] },
+            { full: 'PLAŽA', display: 'PLA_A', missing: 'Ž', options: ['Ž','Z','Š','S'] },
+            { full: 'ŠUMA', display: '_UMA', missing: 'Š', options: ['Š','S','Z','Ž'] },
+            { full: 'RIJEKA', display: 'RIJE_A', missing: 'K', options: ['K','G','H','J'] },
+            { full: 'PLANINA', display: 'PLANI_A', missing: 'N', options: ['N','M','NJ','J'] },
+            { full: 'GRAD', display: 'GRA_', missing: 'D', options: ['D','T','B','P'] },
+            { full: 'ŠKOLA', display: '_KOLA', missing: 'Š', options: ['Š','S','Z','Ž'] },
+            { full: 'UCITELJICA', display: 'UCITEL_ICA', missing: 'J', options: ['J','L','LJ','NJ'] },
+            { full: 'PRIJATELJ', display: 'PRIJATEL_', missing: 'J', options: ['J','L','LJ','NJ'] },
+            { full: 'OBITELJ', display: 'OBITEL_', missing: 'J', options: ['J','L','LJ','NJ'] },
+            { full: 'KNJIGA', display: 'K_IGA', missing: 'NJ', options: ['NJ','J','LJ','N'] },
+            { full: 'HLJEB', display: 'H_EB', missing: 'LJ', options: ['LJ','J','NJ','L'] },
+            { full: 'MLIJEKO', display: 'MLI_EKO', missing: 'J', options: ['J','L','LJ','NJ'] },
+            { full: 'JABUKA', display: 'JABU_A', missing: 'K', options: ['K','G','H','J'] },
+            { full: 'NARANČA', display: 'NARAN_A', missing: 'Č', options: ['Č','Ć','C','K'] },
+            { full: 'BANANA', display: 'BAN_NA', missing: 'A', options: ['A','E','I','O'] },
+            { full: 'JAGODA', display: 'JAGO_A', missing: 'D', options: ['D','T','B','P'] },
+            { full: 'KRUSKA', display: 'KRU_KA', missing: 'Š', options: ['Š','S','Z','Ž'] },
+            { full: 'LIMUN', display: 'LIMU_', missing: 'N', options: ['N','M','NJ','J'] },
+            { full: 'LUBENICA', display: 'LUBE ICA', missing: 'N', options: ['N','M','NJ','J'] },
+            { full: 'MRKVA', display: 'MR_VA', missing: 'K', options: ['K','G','H','J'] },
+            { full: 'KRUMPIR', display: 'KRU_PIR', missing: 'M', options: ['M','N','NJ','J'] },
+            { full: 'KUPUS', display: 'KU_US', missing: 'P', options: ['P','B','D','T'] },
+            { full: 'SIJALICA', display: 'SIJALICA', missing: 'S', options: ['S','Z','Ž','Š'] },
+            { full: 'ORMAR', display: 'OR_AR', missing: 'M', options: ['M','N','NJ','J'] },
+            { full: 'JASTUK', display: 'JASTU_', missing: 'K', options: ['K','G','H','J'] },
+            { full: 'DEKA', display: '_EKA', missing: 'D', options: ['D','T','B','P'] },
+            { full: 'CIPELA', display: 'CI_ELA', missing: 'P', options: ['P','B','D','T'] },
+            { full: 'ČIZMA', display: '_IZMA', missing: 'Č', options: ['Č','Ć','C','K'] },
+            { full: 'KAPA', display: '_APA', missing: 'K', options: ['K','G','H','J'] },
+            { full: 'RAKETA', display: 'RAKETA', missing: 'R', options: ['R','V','L','J'] },
+            { full: 'BROD', display: '_ROD', missing: 'B', options: ['B','P','D','T'] },
+            { full: 'AVION', display: 'AVI_N', missing: 'O', options: ['O','A','E','U'] },
+            { full: 'AUTOBUS', display: 'AUT_BUS', missing: 'O', options: ['O','A','E','U'] },
+            { full: 'BICIKL', display: 'BICIK_', missing: 'L', options: ['L','J','R','V'] },
+            { full: 'KAMION', display: 'KAMI_N', missing: 'O', options: ['O','A','E','U'] },
+            { full: 'BRODICA', display: 'BRO_ICA', missing: 'D', options: ['D','T','B','P'] },
+            { full: 'TRAMVAJ', display: 'TRA_VAJ', missing: 'M', options: ['M','N','NJ','J'] },
+            { full: 'VOZ', display: '_OZ', missing: 'V', options: ['V','F','B','P'] },
+            { full: 'LIVADA', display: 'LIVA_A', missing: 'D', options: ['D','T','B','P'] },
+            { full: 'VRT', display: '_RT', missing: 'V', options: ['V','F','B','P'] },
+            { full: 'BAŠTA', display: 'BA_TA', missing: 'Š', options: ['Š','S','Z','Ž'] },
+            { full: 'TRAVA', display: 'TRA_A', missing: 'V', options: ['V','F','B','P'] },
+            { full: 'LIST', display: '_IST', missing: 'L', options: ['L','J','R','V'] },
+            { full: 'KORIJEN', display: 'KORI_EN', missing: 'J', options: ['J','L','LJ','NJ'] },
+            { full: 'GRANA', display: 'GRA_A', missing: 'N', options: ['N','M','NJ','J'] },
+            { full: 'DEBLO', display: 'DE_LO', missing: 'B', options: ['B','P','D','T'] },
+            { full: 'KORA', display: '_ORA', missing: 'K', options: ['K','G','H','J'] },
+            { full: 'BALON', display: 'BALO_', missing: 'N', options: ['N','M','NJ','J'] },
+            { full: 'LUTKA', display: 'LU_KA', missing: 'T', options: ['T','D','B','P'] },
+            { full: 'KOCKE', display: '_OCKE', missing: 'K', options: ['K','G','H','J'] },
+            { full: 'SLIKA', display: 'SLI_A', missing: 'K', options: ['K','G','H','J'] },
+            { full: 'BUBAMARA', display: 'BUBA_ARA', missing: 'M', options: ['M','N','NJ','J'] },
+            { full: 'LEPTIR', display: 'LEP_IR', missing: 'T', options: ['T','D','B','P'] },
+            { full: 'PČELA', display: '_ELA', missing: 'PČ', options: ['PČ','PC','P','Č'] },
+            { full: 'MRAV', display: '_RAV', missing: 'M', options: ['M','N','NJ','J'] },
+            { full: 'MUHA', display: '_UHA', missing: 'M', options: ['M','N','NJ','J'] },
+            { full: 'KOMARAC', display: 'KO_ARAC', missing: 'M', options: ['M','N','NJ','J'] },
+            { full: 'RIBA', display: 'RI_A', missing: 'B', options: ['B','P','D','T'] },
+            { full: 'KORNJAČA', display: 'KOR JAČA', missing: 'NJ', options: ['NJ','J','LJ','N'] },
+            { full: 'ŽABA', display: '_ABA', missing: 'Ž', options: ['Ž','Z','Š','S'] },
+            { full: 'GUŠTER', display: 'GU_TER', missing: 'Š', options: ['Š','S','Z','Ž'] },
+            { full: 'ZMIJA', display: '_IJA', missing: 'ZM', options: ['ZM','Z','M','S'] },
+            { full: 'SLON', display: '_LON', missing: 'S', options: ['S','Z','Ž','Š'] },
+            { full: 'TIGAR', display: '_IGAR', missing: 'T', options: ['T','D','B','P'] },
+            { full: 'LAV', display: '_AV', missing: 'L', options: ['L','J','R','V'] },
+            { full: 'MEDVJED', display: 'MEDV_E', missing: 'J', options: ['J','L','LJ','NJ'] },
+            { full: 'ZEKO', display: '_EKO', missing: 'Z', options: ['Z','S','Ž','Š'] },
+            { full: 'VJEVERICA', display: 'VJE_ERICA', missing: 'V', options: ['V','F','B','P'] },
+            { full: 'LASICA', display: 'LASI_A', missing: 'C', options: ['C','K','S','Z'] },
+            { full: 'MIŠ', display: '_IŠ', missing: 'M', options: ['M','N','NJ','J'] },
+            { full: 'HRČAK', display: 'HR_AK', missing: 'Č', options: ['Č','Ć','C','K'] }
+        ];
+
+        const sounds = [
+            { name: 'Pas', icon: '🐶', freq: [400, 600, 400] },
+            { name: 'Mačka', icon: '🐱', freq: [800, 1000, 800] },
+            { name: 'Krava', icon: '🐮', freq: [200, 300, 200] },
+            { name: 'Ovan', icon: '🐑', freq: [600, 800, 600] },
+            { name: 'Pijetao', icon: '🐓', freq: [1000, 1200, 1000] },
+            { name: 'Patka', icon: '🦆', freq: [500, 700, 500] },
+            { name: 'Slon', icon: '🐘', freq: [150, 250, 150] },
+            { name: 'Konj', icon: '🐴', freq: [300, 500, 300] }
+        ];
+
+        function startGame(game) {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById(game + 'Game').style.display = 'block';
+            currentGame = game;
+        }
+
+        function backToMenu() {
+            clearInterval(timer);
+            if (currentGame) {
+                document.getElementById(currentGame + 'Game').style.display = 'none';
+            }
+            document.getElementById('mainMenu').style.display = 'grid';
+            currentGame = null;
+        }
+
+        function startTimer(gameType) {
+            timeLeft = 60;
+            score = 0;
+            document.getElementById(gameType + 'Timer').textContent = timeLeft;
+            document.getElementById(gameType + 'Score').textContent = score;
+            document.getElementById(gameType + 'Timer').style.color = '#e74c3c';
+            document.getElementById(gameType + 'Timer').style.animation = 'none';
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById(gameType + 'Timer').textContent = timeLeft;
+                if (timeLeft <= 10) {
+                    document.getElementById(gameType + 'Timer').style.animation = 'pulse 0.5s infinite';
+                }
+                if (timeLeft <= 0) {
+                    endGame(gameType);
+                }
+            }, 1000);
+        }
+
+        function endGame(gameType) {
+            clearInterval(timer);
+            document.getElementById(gameType + 'Play').style.display = 'none';
+            document.getElementById(gameType + 'Over').style.display = 'block';
+            document.getElementById(gameType + 'FinalScore').textContent = score + ' bodova';
+            
+            let stars = '';
+            if (score >= 25) stars = '⭐⭐⭐⭐⭐';
+            else if (score >= 20) stars = '⭐⭐⭐⭐';
+            else if (score >= 15) stars = '⭐⭐⭐';
+            else if (score >= 10) stars = '⭐⭐';
+            else if (score >= 5) stars = '⭐';
+            else stars = '💪';
+            
+            document.getElementById(gameType + 'Stars').textContent = stars;
+        }
+
+        // Game 1: Color
+        function initColorGame() {
+            document.getElementById('colorStart').style.display = 'none';
+            document.getElementById('colorOver').style.display = 'none';
+            document.getElementById('colorPlay').style.display = 'block';
+            startTimer('color');
+            nextColorRound();
+        }
+
+        function nextColorRound() {
+            const target = colors[Math.floor(Math.random() * colors.length)];
+            document.getElementById('targetColorName').textContent = target.name;
+            document.getElementById('targetColorName').style.color = target.bg;
+            
+            const grid = document.getElementById('colorGrid');
+            grid.innerHTML = '';
+            
+            const shuffled = [...colors].sort(() => Math.random() - 0.5).slice(0, 6);
+            if (!shuffled.find(c => c.name === target.name)) shuffled[0] = target;
+            shuffled.sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(color => {
+                const div = document.createElement('div');
+                div.className = 'option-btn';
+                div.style.backgroundColor = color.bg;
+                div.onclick = () => {
+                    if (color.name === target.name) {
+                        score++;
+                        document.getElementById('colorScore').textContent = score;
+                        nextColorRound();
+                    } else {
+                        div.classList.add('wrong');
+                        setTimeout(() => div.classList.remove('wrong'), 500);
+                    }
+                };
+                grid.appendChild(div);
+            });
+        }
+
+        // Game 2: Number
+        function initNumberGame() {
+            document.getElementById('numberStart').style.display = 'none';
+            document.getElementById('numberOver').style.display = 'none';
+            document.getElementById('numberPlay').style.display = 'block';
+            startTimer('number');
+            nextNumberRound();
+        }
+
+        function nextNumberRound() {
+            const target = Math.floor(Math.random() * 20) + 1;
+            document.getElementById('targetNumber').textContent = target;
+            
+            const grid = document.getElementById('numberGrid');
+            grid.innerHTML = '';
+            
+            const numbers = [target];
+            while (numbers.length < 12) {
+                const n = Math.floor(Math.random() * 20) + 1;
+                if (!numbers.includes(n)) numbers.push(n);
+            }
+            numbers.sort(() => Math.random() - 0.5);
+            
+            numbers.forEach(num => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = num;
+                btn.style.fontSize = '1.5em';
+                btn.onclick = () => {
+                    if (num === target) {
+                        score++;
+                        document.getElementById('numberScore').textContent = score;
+                        nextNumberRound();
+                    } else {
+                        btn.classList.add('wrong');
+                        setTimeout(() => btn.classList.remove('wrong'), 500);
+                    }
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        // Game 3: Letter
+        function initLetterGame() {
+            document.getElementById('letterStart').style.display = 'none';
+            document.getElementById('letterOver').style.display = 'none';
+            document.getElementById('letterPlay').style.display = 'block';
+            startTimer('letter');
+            nextLetterRound();
+        }
+
+        function nextLetterRound() {
+            const word = words[Math.floor(Math.random() * words.length)];
+            document.getElementById('letterHint').textContent = 'RIJEČ: ' + word.display;
+            document.getElementById('letterDisplay').textContent = '_';
+            
+            const options = document.getElementById('letterOptions');
+            options.innerHTML = '';
+            
+            word.options.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'letter-btn';
+                btn.textContent = letter;
+                btn.onclick = () => {
+                    if (letter === word.missing) {
+                        score++;
+                        document.getElementById('letterScore').textContent = score;
+                        document.getElementById('letterDisplay').textContent = letter;
+                        setTimeout(nextLetterRound, 500);
+                    } else {
+                        btn.classList.add('wrong');
+                        setTimeout(() => btn.classList.remove('wrong'), 500);
+                    }
+                };
+                options.appendChild(btn);
+            });
+        }
+
+        // Game 4: Animal
+        function initAnimalGame() {
+            document.getElementById('animalStart').style.display = 'none';
+            document.getElementById('animalOver').style.display = 'none';
+            document.getElementById('animalPlay').style.display = 'block';
+            startTimer('animal');
+            nextAnimalRound();
+        }
+
+        function nextAnimalRound() {
+            const target = animals[Math.floor(Math.random() * animals.length)];
+            document.getElementById('targetAnimal').textContent = target;
+            
+            const grid = document.getElementById('animalGrid');
+            grid.innerHTML = '';
+            
+            const selected = [target];
+            while (selected.length < 9) {
+                const a = animals[Math.floor(Math.random() * animals.length)];
+                if (!selected.includes(a)) selected.push(a);
+            }
+            selected.sort(() => Math.random() - 0.5);
+            
+            selected.forEach(animal => {
+                const card = document.createElement('div');
+                card.className = 'option-btn';
+                card.textContent = animal;
+                card.onclick = () => {
+                    if (animal === target) {
+                        score++;
+                        document.getElementById('animalScore').textContent = score;
+                        card.classList.add('correct');
+                        setTimeout(nextAnimalRound, 500);
+                    } else {
+                        card.classList.add('wrong');
+                        setTimeout(() => card.classList.remove('wrong'), 500);
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        // Game 5: Shape
+        function initShapeGame() {
+            document.getElementById('shapeStart').style.display = 'none';
+            document.getElementById('shapeOver').style.display = 'none';
+            document.getElementById('shapePlay').style.display = 'block';
+            startTimer('shape');
+            nextShapeRound();
+        }
+
+        function nextShapeRound() {
+            const target = shapes[Math.floor(Math.random() * shapes.length)];
+            document.getElementById('targetShape').textContent = target;
+            
+            const grid = document.getElementById('shapeGrid');
+            grid.innerHTML = '';
+            
+            const selected = [target];
+            while (selected.length < 9) {
+                const s = shapes[Math.floor(Math.random() * shapes.length)];
+                if (!selected.includes(s)) selected.push(s);
+            }
+            selected.sort(() => Math.random() - 0.5);
+            
+            selected.forEach(shape => {
+                const div = document.createElement('div');
+                div.className = 'option-btn';
+                div.textContent = shape;
+                div.onclick = () => {
+                    if (shape === target) {
+                        score++;
+                        document.getElementById('shapeScore').textContent = score;
+                        div.classList.add('correct');
+                        setTimeout(nextShapeRound, 500);
+                    } else {
+                        div.classList.add('wrong');
+                        setTimeout(() => div.classList.remove('wrong'), 500);
+                    }
+                };
+                grid.appendChild(div);
+            });
+        }
+
+        // Game 6: Math
+        function initMathGame() {
+            document.getElementById('mathStart').style.display = 'none';
+            document.getElementById('mathOver').style.display = 'none';
+            document.getElementById('mathPlay').style.display = 'block';
+            startTimer('math');
+            nextMathRound();
+        }
+
+        function nextMathRound() {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = Math.floor(Math.random() * 10) + 1;
+            const result = a + b;
+            document.getElementById('mathProblem').textContent = `${a} + ${b} = ?`;
+            
+            const grid = document.getElementById('mathGrid');
+            grid.innerHTML = '';
+            
+            const answers = [result];
+            while (answers.length < 6) {
+                const wrong = Math.floor(Math.random() * 20) + 2;
+                if (!answers.includes(wrong) && wrong !== result) answers.push(wrong);
+            }
+            answers.sort(() => Math.random() - 0.5);
+            
+            answers.forEach(ans => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = ans;
+                btn.style.fontSize = '1.8em';
+                btn.onclick = () => {
+                    if (ans === result) {
+                        score++;
+                        document.getElementById('mathScore').textContent = score;
+                        btn.classList.add('correct');
+                        setTimeout(nextMathRound, 500);
+                    } else {
+                        btn.classList.add('wrong');
+                        setTimeout(() => btn.classList.remove('wrong'), 500);
+                    }
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        // Game 7: Memory
+        let memoryCards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let memoryAttempts = 0;
+
+        function initMemoryGame() {
+            document.getElementById('memoryStart').style.display = 'none';
+            document.getElementById('memoryOver').style.display = 'none';
+            document.getElementById('memoryPlay').style.display = 'block';
+            timeLeft = 60;
+            score = 0;
+            matchedPairs = 0;
+            memoryAttempts = 0;
+            document.getElementById('memoryTimer').textContent = timeLeft;
+            document.getElementById('memoryScore').textContent = memoryAttempts;
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('memoryTimer').textContent = timeLeft;
+                if (timeLeft <= 0) endMemoryGame();
+            }, 1000);
+            
+            setupMemoryGame();
+        }
+
+        function setupMemoryGame() {
+            const grid = document.getElementById('memoryGrid');
+            grid.innerHTML = '';
+            
+            const selectedAnimals = animals.slice(0, 8);
+            const pairs = [...selectedAnimals, ...selectedAnimals];
+            pairs.sort(() => Math.random() - 0.5);
+            
+            memoryCards = pairs.map((animal, index) => ({
+                id: index,
+                animal: animal,
+                flipped: false,
+                matched: false
+            }));
+            
+            memoryCards.forEach((card, index) => {
+                const div = document.createElement('div');
+                div.className = 'memory-card';
+                div.dataset.index = index;
+                div.textContent = '?';
+                div.onclick = () => flipCard(index);
+                grid.appendChild(div);
+            });
+        }
+
+        function flipCard(index) {
+            const card = memoryCards[index];
+            const element = document.querySelector(`[data-index="${index}"]`);
+            
+            if (card.flipped || card.matched || flippedCards.length >= 2) return;
+            
+            card.flipped = true;
+            element.textContent = card.animal;
+            element.classList.add('flipped');
+            flippedCards.push({ index, animal: card.animal });
+            
+            if (flippedCards.length === 2) {
+                memoryAttempts++;
+                document.getElementById('memoryScore').textContent = memoryAttempts;
+                
+                if (flippedCards[0].animal === flippedCards[1].animal) {
+                    memoryCards[flippedCards[0].index].matched = true;
+                    memoryCards[flippedCards[1].index].matched = true;
+                    matchedPairs++;
+                    flippedCards = [];
+                    
+                    if (matchedPairs === 8) {
+                        score = Math.max(0, 50 - memoryAttempts);
+                        endMemoryGame();
+                    }
+                } else {
+                    setTimeout(() => {
+                        flippedCards.forEach(fc => {
+                            memoryCards[fc.index].flipped = false;
+                            const el = document.querySelector(`[data-index="${fc.index}"]`);
+                            el.textContent = '?';
+                            el.classList.remove('flipped');
+                        });
+                        flippedCards = [];
+                    }, 1000);
+                }
+            }
+        }
+
+        function endMemoryGame() {
+            clearInterval(timer);
+            document.getElementById('memoryPlay').style.display = 'none';
+            document.getElementById('memoryOver').style.display = 'block';
+            document.getElementById('memoryFinalScore').textContent = score + ' bodova';
+            
+            let stars = '';
+            if (score >= 40) stars = '⭐⭐⭐⭐⭐';
+            else if (score >= 30) stars = '⭐⭐⭐⭐';
+            else if (score >= 20) stars = '⭐⭐⭐';
+            else if (score >= 10) stars = '⭐⭐';
+            else stars = '⭐';
+            
+            document.getElementById('memoryStars').textContent = stars;
+        }
+
+        // Game 8: Sound
+        let currentSound = null;
+        let audioCtx = null;
+
+        function initSoundGame() {
+            document.getElementById('soundStart').style.display = 'none';
+            document.getElementById('soundOver').style.display = 'none';
+            document.getElementById('soundPlay').style.display = 'block';
+            startTimer('sound');
+            nextSoundRound();
+        }
+
+        function nextSoundRound() {
+            currentSound = sounds[Math.floor(Math.random() * sounds.length)];
+            document.getElementById('playSoundBtn').textContent = '🔊';
+            
+            const grid = document.getElementById('soundGrid');
+            grid.innerHTML = '';
+            
+            const options = [currentSound];
+            while (options.length < 4) {
+                const s = sounds[Math.floor(Math.random() * sounds.length)];
+                if (!options.includes(s)) options.push(s);
+            }
+            options.sort(() => Math.random() - 0.5);
+            
+            options.forEach(sound => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `${sound.icon}<br><small>${sound.name}</small>`;
+                btn.style.fontSize = '1em';
+                btn.style.flexDirection = 'column';
+                btn.onclick = () => {
+                    if (sound.name === currentSound.name) {
+                        score++;
+                        document.getElementById('soundScore').textContent = score;
+                        btn.classList.add('correct');
+                        setTimeout(nextSoundRound, 1000);
+                    } else {
+                        btn.classList.add('wrong');
+                        setTimeout(() => btn.classList.remove('wrong'), 500);
+                    }
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        function playCurrentSound() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            const freq = currentSound.freq;
+            oscillator.frequency.setValueAtTime(freq[0], audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(freq[1], audioCtx.currentTime + 0.1);
+            oscillator.frequency.exponentialRampToValueAtTime(freq[2], audioCtx.currentTime + 0.3);
+            
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+
+        // Game 9: Size
+        function initSizeGame() {
+            document.getElementById('sizeStart').style.display = 'none';
+            document.getElementById('sizeOver').style.display = 'none';
+            document.getElementById('sizePlay').style.display = 'block';
+            startTimer('size');
+            nextSizeRound();
+        }
+
+        function nextSizeRound() {
+            const isBigger = Math.random() > 0.5;
+            document.getElementById('sizeTarget').textContent = isBigger ? 'Pronađi VEĆE' : 'Pronađi MANJE';
+            
+            const grid = document.getElementById('sizeGrid');
+            grid.innerHTML = '';
+            
+            const items = [
+                { emoji: '🐘', size: 5 }, { emoji: '🐁', size: 1 },
+                { emoji: '🐋', size: 6 }, { emoji: '🐟', size: 2 },
+                { emoji: '🦕', size: 5 }, { emoji: '🐜', size: 1 },
+                { emoji: '🏠', size: 4 }, { emoji: '🏢', size: 5 }
+            ];
+            
+            const pair = items.sort(() => Math.random() - 0.5).slice(0, 2);
+            
+            pair.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span style="font-size: ${item.size}em;">${item.emoji}</span>`;
+                btn.onclick = () => {
+                    const correct = isBigger ? (item.size === Math.max(pair[0].size, pair[1].size)) : (item.size === Math.min(pair[0].size, pair[1].size));
+                    if (correct) {
+                        score++;
+                        document.getElementById('sizeScore').textContent = score;
+                        btn.classList.add('correct');
+                        setTimeout(nextSizeRound, 1000);
+                    } else {
+                        btn.classList.add('wrong');
+                        setTimeout(() => btn.classList.remove('wrong'), 500);
+                    }
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        // Game 10: Pattern
+        function initPatternGame() {
+            document.getElementById('patternStart').style.display = 'none';
+            document.getElementById('patternOver').style.display = 'none';
+            document.getElementById('patternPlay').style.display = 'block';
+            startTimer('pattern');
+            nextPatternRound();
+        }
+
+        function nextPatternRound() {
+            const patterns = [
+                { seq: '🔴🔵🔴🔵', next: '🔴', options: ['🔴','🔵','🟢','🟡'] },
+                { seq: '🔺🔻🔺🔻', next: '🔺', options: ['🔺','🔻','🔸','🔹'] },
+                { seq: '⭐🌟⭐🌟', next: '⭐', options: ['⭐','🌟','✨','💫'] },
+                { seq: '🐶🐱🐶🐱', next: '🐶', options: ['🐶','🐱','🐭','🐹'] },
+                { seq: '🍎🍊🍎🍊', next: '🍎',                options: ['🍎','🍊','🍋','🍌'] },
+                { seq: '⚽🏀⚽🏀', next: '⚽', options: ['⚽','🏀','🎾','🏐'] },
+                { seq: '🚗🚕🚗🚕', next: '🚗', options: ['🚗','🚕','🚙','🚌'] },
+                { seq: '🌞🌜🌞🌜', next: '🌞', options: ['🌞','🌜','⭐','☁️'] },
+                { seq: '🔔🔕🔔🔕',                next: '🔔', options: ['🔔','🔕','📢','🔊'] },
+                { seq: '🎄🎅🎄🎅', next: '🎄', options: ['🎄','🎅','🎁','⛄'] },
+                { seq: '🦋🐛🦋🐛', next: '🦋', options: ['🦋','🐛','🐝','🐞'] }
+            ];
+            
+            const pattern = patterns[Math.floor(Math.random() * patterns.length)];
+            document.getElementById('patternDisplay').textContent = pattern.seq + '?';
+            
+            const grid = document.getElementById('patternGrid');
+            grid.innerHTML = '';
+            
+            pattern.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => {
+                    if (opt === pattern.next) {
+                        score++;
+                        document.getElementById('patternScore').textContent = score;
+                        btn.classList.add('correct');
+                        setTimeout(nextPatternRound, 800);
+                    } else {
+                        btn.classList.add('wrong');
+                        setTimeout(() => btn.classList.remove('wrong'), 500);
+                    }
+                };
+                grid.appendChild(btn);
+            });
+        }
+    </script>
+</body>
+</html>
